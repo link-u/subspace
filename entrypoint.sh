@@ -175,12 +175,29 @@ if ! test -d /etc/service/subspace; then
   mkdir /etc/service/subspace
   cat <<RUNIT >/etc/service/subspace/run
 #!/bin/sh
+export SUBSPACE_HTTP_HOST=${SUBSPACE_HTTP_HOST}
+export SUBSPACE_LETSENCRYPT=${SUBSPACE_LETSENCRYPT}
+export SUBSPACE_HTTP_INSECURE=${SUBSPACE_HTTP_INSECURE}
+export SUBSPACE_HTTP_ADDR=${SUBSPACE_HTTP_ADDR}
+export SUBSPACE_NAMESERVER=${SUBSPACE_NAMESERVER}
+export SUBSPACE_LISTENPORT=${SUBSPACE_LISTENPORT}
+export SUBSPACE_IPV4_POOL=${SUBSPACE_IPV4_POOL}
+export SUBSPACE_IPV4_CIDR=${SUBSPACE_IPV4_CIDR}
+export SUBSPACE_IPV4_PREF=${SUBSPACE_IPV4_PREF}
+export SUBSPACE_IPV6_POOL=${SUBSPACE_IPV6_POOL}
+export SUBSPACE_IPV6_CIDR=${SUBSPACE_IPV6_CIDR}
+export SUBSPACE_IPV6_PREF=${SUBSPACE_IPV6_PREF}
+export SUBSPACE_IPV4_GW=${SUBSPACE_IPV4_GW}
+export SUBSPACE_IPV6_GW=${SUBSPACE_IPV6_GW}
+export SUBSPACE_IPV6_NAT_ENABLED=${SUBSPACE_IPV6_NAT_ENABLED}
+export SUBSPACE_ALLOWED_IPS=${SUBSPACE_ALLOWED_IPS}
 exec /usr/bin/subspace \
     "--http-host=${SUBSPACE_HTTP_HOST}" \
     "--http-addr=${SUBSPACE_HTTP_ADDR}" \
     "--http-insecure=${SUBSPACE_HTTP_INSECURE}" \
     "--backlink=${SUBSPACE_BACKLINK}" \
-    "--letsencrypt=${SUBSPACE_LETSENCRYPT}"
+    "--debug" \
+    "--letsencrypt=${SUBSPACE_LETSENCRYPT}" > /proc/1/fd/1 2> /proc/1/fd/2
 RUNIT
   chmod +x /etc/service/subspace/run
 
