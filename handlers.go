@@ -407,24 +407,28 @@ func profileAddHandler(w *Web) {
 		allowedips = ips
 	}
 
+	// FIXME(ledyba-z): /24前提になってるので、今回は雑に/16前提といたしました。
+	ipv4Post := fmt.Sprintf("%d.%d", ((profile.Number >> 8) & 0xff), (profile.Number & 0xff))
+	ipv6Post := fmt.Sprintf("%d:%d", ((profile.Number >> 8) & 0xff), (profile.Number & 0xff))
+
 	script := `
 cd {{$.Datadir}}/wireguard
 wg_private_key="$(wg genkey)"
 wg_public_key="$(echo $wg_private_key | wg pubkey)"
 
-wg set wg0 peer ${wg_public_key} allowed-ips {{$.IPv4Pref}}{{$.Profile.Number}}/32,{{$.IPv6Pref}}{{$.Profile.Number}}/128
+wg set wg0 peer ${wg_public_key} allowed-ips {{$.IPv4Pref}}{{$.IPv4Post}}/32,{{$.IPv6Pref}}{{$.IPv6Post}}/128
 
 cat <<WGPEER >peers/{{$.Profile.ID}}.conf
 [Peer]
 PublicKey = ${wg_public_key}
-AllowedIPs = {{$.IPv4Pref}}{{$.Profile.Number}}/32,{{$.IPv6Pref}}{{$.Profile.Number}}/128
+AllowedIPs = {{$.IPv4Pref}}{{$.IPv4Post}}/32,{{$.IPv6Pref}}{{$.IPv6Post}}/128
 WGPEER
 
 cat <<WGCLIENT >clients/{{$.Profile.ID}}.conf
 [Interface]
 PrivateKey = ${wg_private_key}
 DNS = 8.8.8.8, 2001:4860:4860::8888
-Address = {{$.IPv4Pref}}{{$.Profile.Number}}/{{$.IPv4Cidr}},{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}
+Address = {{$.IPv4Pref}}{{$.IPv4Post}}/{{$.IPv4Cidr}},{{$.IPv6Pref}}{{$.IPv6Post}}/{{$.IPv6Cidr}}
 
 [Peer]
 PublicKey = $(cat server.public)
@@ -441,6 +445,8 @@ WGCLIENT
 		IPv6Gw       string
 		IPv4Pref     string
 		IPv6Pref     string
+		IPv4Post     string
+		IPv6Post     string
 		IPv4Cidr     string
 		IPv6Cidr     string
 		Listenport   string
@@ -453,6 +459,8 @@ WGCLIENT
 		ipv6Gw,
 		ipv4Pref,
 		ipv6Pref,
+		ipv4Post,
+		ipv6Post,
 		ipv4Cidr,
 		ipv6Cidr,
 		listenport,
