@@ -68,3 +68,20 @@ set -o xtrace
 	}
 	return string(output), nil
 }
+
+func ipv4host(Number int, IPV4_CIDR int) string {
+	var IPV4_HOST string = ""
+	if IPV4_CIDR <= 0 {
+		IPV4_HOST += fmt.Sprintf("%d.", Number/256/256/256%256)
+	}
+	if IPV4_CIDR <= 8 {
+		IPV4_HOST += fmt.Sprintf("%d.", Number/256/256%256)
+	}
+	if IPV4_CIDR <= 16 {
+		IPV4_HOST += fmt.Sprintf("%d.", Number/256%256)
+	}
+	if IPV4_CIDR <= 24 {
+		IPV4_HOST += fmt.Sprintf("%d", Number%256) //上３つと違いピリオドがないのは最後の数だから
+	}
+	return IPV4_HOST
+}

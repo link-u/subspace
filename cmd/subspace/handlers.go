@@ -22,7 +22,6 @@ var (
 	validEmail    = regexp.MustCompile(`^[ -~]+@[ -~]+$`)
 	validPassword = regexp.MustCompile(`^[ -~]{6,200}$`)
 	validString   = regexp.MustCompile(`^[ -~]{1,200}$`)
-	maxProfiles   = 250
 )
 
 func getEnv(key, fallback string) string {
@@ -402,10 +401,10 @@ func profileAddHandler(w *Web) {
 		userID = w.User.ID
 	}
 
-	if len(config.ListProfiles()) >= maxProfiles {
-		w.Redirect("/?error=addprofile")
-		return
-	}
+	//if len(config.ListProfiles()) >= maxProfiles {
+	//	w.Redirect("/?error=addprofile")
+	//	return
+	//}
 
 	profile, err := config.AddProfile(userID, name, platform)
 	if err != nil {
@@ -467,17 +466,19 @@ func profileAddHandler(w *Web) {
 		persistentKeepalive = keepalive
 	}
 
+	ipv4Suff := ipv4host(profile.Number,ipv4Cidr)
+
 	script := `
 cd {{$.Datadir}}/wireguard
 wg_private_key="$(wg genkey)"
 wg_public_key="$(echo $wg_private_key | wg pubkey)"
 
-wg set wg0 peer ${wg_public_key} allowed-ips {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.Profile.Number}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
+wg set wg0 peer ${wg_public_key} allowed-ips {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
 
 cat <<WGPEER >peers/{{$.Profile.ID}}.conf
 [Peer]
 PublicKey = ${wg_public_key}
-AllowedIPs = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.Profile.Number}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
+AllowedIPs = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
 WGPEER
 
 cat <<WGCLIENT >clients/{{$.Profile.ID}}.conf
@@ -486,7 +487,7 @@ PrivateKey = ${wg_private_key}
 {{- if not .DisableDNS }}
 DNS = {{if .Ipv4Enabled}}{{$.IPv4Gw}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Gw}}{{end}}
 {{- end }}
-Address = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.Profile.Number}}/{{$.IPv4Cidr}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}{{end}}
+Address = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/{{$.IPv4Cidr}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}{{end}}
 
 [Peer]
 PublicKey = $(cat server.public)
@@ -503,6 +504,7 @@ WGCLIENT
 		IPv4Gw       		string
 		IPv6Gw       		string
 		IPv4Pref     		string
+		IPv4Suff     		string
 		IPv6Pref     		string
 		IPv4Cidr     		string
 		IPv6Cidr     		string
@@ -519,6 +521,7 @@ WGCLIENT
 		ipv4Gw,
 		ipv6Gw,
 		ipv4Pref,
+		ipv4Suff,
 		ipv6Pref,
 		ipv4Cidr,
 		ipv6Cidr,
