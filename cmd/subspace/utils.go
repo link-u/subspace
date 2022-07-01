@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"text/template"
 	"time"
+	"strconv"
 )
 
 func RandomString(n int) string {
@@ -69,18 +70,20 @@ set -o xtrace
 	return string(output), nil
 }
 
-func ipv4host(Number int, IPV4_CIDR int) string {
+func ipv4host(Number int, IPV4_CIDR string) string {
+	var cidr int
+	cidr, _ = strconv.Atoi(IPV4_CIDR)
 	var IPV4_HOST string = ""
-	if IPV4_CIDR <= 0 {
+	if cidr <= 0 {
 		IPV4_HOST += fmt.Sprintf("%d.", Number/256/256/256%256)
 	}
-	if IPV4_CIDR <= 8 {
+	if cidr <= 8 {
 		IPV4_HOST += fmt.Sprintf("%d.", Number/256/256%256)
 	}
-	if IPV4_CIDR <= 16 {
+	if cidr <= 16 {
 		IPV4_HOST += fmt.Sprintf("%d.", Number/256%256)
 	}
-	if IPV4_CIDR <= 24 {
+	if cidr <= 24 {
 		IPV4_HOST += fmt.Sprintf("%d", Number%256) //上３つと違いピリオドがないのは最後の数だから
 	}
 	return IPV4_HOST
