@@ -522,7 +522,7 @@ WGCLIENT
 		profile,
 		endpointHost,
 		datadir,
-		ipv4Address
+		ipv4Address,
 		ipv4Gw,
 		ipv6Gw,
 		ipv4Pref,
