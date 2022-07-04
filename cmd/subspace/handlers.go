@@ -413,6 +413,10 @@ func profileAddHandler(w *Web) {
 		return
 	}
 
+        ipv4Pool := "10.99.97.0/24"
+        if pool := getEnv("SUBSPACE_IPV4_POOL", "nil"); pool != "nil" {
+                ipv4Pool = pool
+        }
 	ipv4Pref := "10.99.97."
 	if pref := getEnv("SUBSPACE_IPV4_PREF", "nil"); pref != "nil" {
 		ipv4Pref = pref
@@ -466,19 +470,19 @@ func profileAddHandler(w *Web) {
 		persistentKeepalive = keepalive
 	}
 
-	ipv4Suff := ipv4host(profile.Number,ipv4Cidr)
+	ipv4Address, _ := ipv4address(profile.Number,ipv4Pool)
 
 	script := `
 cd {{$.Datadir}}/wireguard
 wg_private_key="$(wg genkey)"
 wg_public_key="$(echo $wg_private_key | wg pubkey)"
 
-wg set wg0 peer ${wg_public_key} allowed-ips {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
+wg set wg0 peer ${wg_public_key} allowed-ips {{if .Ipv4Enabled}}{{$.IPv4Address}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
 
 cat <<WGPEER >peers/{{$.Profile.ID}}.conf
 [Peer]
 PublicKey = ${wg_public_key}
-AllowedIPs = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
+AllowedIPs = {{if .Ipv4Enabled}}{{$.IPv4Address}}/32{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/128{{end}}
 WGPEER
 
 cat <<WGCLIENT >clients/{{$.Profile.ID}}.conf
@@ -487,7 +491,7 @@ PrivateKey = ${wg_private_key}
 {{- if not .DisableDNS }}
 DNS = {{if .Ipv4Enabled}}{{$.IPv4Gw}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Gw}}{{end}}
 {{- end }}
-Address = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.IPv4Suff}}/{{$.IPv4Cidr}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}{{end}}
+Address = {{if .Ipv4Enabled}}{{$.IPv4Pref}}{{$.Profile.Number}}/{{$.IPv4Cidr}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}{{end}}
 
 [Peer]
 PublicKey = $(cat server.public)
@@ -501,10 +505,10 @@ WGCLIENT
 		Profile      		Profile
 		EndpointHost 		string
 		Datadir      		string
+		IPv4Address  		string
 		IPv4Gw       		string
 		IPv6Gw       		string
 		IPv4Pref     		string
-		IPv4Suff     		string
 		IPv6Pref     		string
 		IPv4Cidr     		string
 		IPv6Cidr     		string
@@ -518,10 +522,10 @@ WGCLIENT
 		profile,
 		endpointHost,
 		datadir,
+		ipv4Address
 		ipv4Gw,
 		ipv6Gw,
 		ipv4Pref,
-		ipv4Suff,
 		ipv6Pref,
 		ipv4Cidr,
 		ipv6Cidr,
@@ -713,3 +717,4 @@ rm clients/{{$.Profile.ID}}.conf
 	}
 	return config.DeleteProfile(profile.ID)
 }
+
