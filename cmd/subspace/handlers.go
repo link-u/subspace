@@ -492,6 +492,7 @@ PrivateKey = ${wg_private_key}
 DNS = {{if .Ipv4Enabled}}{{$.IPv4Gw}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Gw}}{{end}}
 {{- end }}
 Address = {{if .Ipv4Enabled}}{{$.IPv4Address}}/{{$.IPv4Cidr}}{{end}}{{if .Ipv6Enabled}}{{if .Ipv4Enabled}},{{end}}{{$.IPv6Pref}}{{$.Profile.Number}}/{{$.IPv6Cidr}}{{end}}
+MTU = 1300
 
 [Peer]
 PublicKey = $(cat server.public)
