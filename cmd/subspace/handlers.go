@@ -462,7 +462,6 @@ func profileAddHandler(w *Web) {
 		allowedips = allowedipswin
 	}
 
-	if w.r.plat
 	ipv4Enabled := true
 	if enable := getEnv("SUBSPACE_IPV4_NAT_ENABLED", "1"); enable == "0" {
 		ipv4Enabled = false
