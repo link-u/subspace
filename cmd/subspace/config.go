@@ -47,13 +47,6 @@ type Profile struct {
 	User User `json:"-"`
 }
 
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-
 func (p Profile) NameClean() string {
 	return regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(p.Name, "")
 }
