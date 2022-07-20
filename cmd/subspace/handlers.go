@@ -453,6 +453,16 @@ func profileAddHandler(w *Web) {
 	if ips := getEnv("SUBSPACE_ALLOWED_IPS", "nil"); ips != "nil" {
 		allowedips = ips
 	}
+	allowedipswin := "0.0.0.0/1, 128.0.0.0/1, ::/1, 8000::/1"
+	if ipsw := getEnv("SUBSPACE_ALLOWED_IPS_WINDOWS", "nil"); ipsw != "nil" {
+		allowedipswin = ipsw
+	}
+
+	if platform == "windows" {
+		allowedips = allowedipswin
+	}
+
+	if w.r.plat
 	ipv4Enabled := true
 	if enable := getEnv("SUBSPACE_IPV4_NAT_ENABLED", "1"); enable == "0" {
 		ipv4Enabled = false
