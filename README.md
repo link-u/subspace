@@ -136,6 +136,7 @@ $ subspace --http-host subspace.example.com
 | `SUBSPACE_PERSISTENT_KEEPALIVE`      | `0`             | Whether PersistentKeepalive should be enabled for clients (seconds) |
 | `SUBSPACE_CONFIG_NAME` | `wg0.conf` | (Added by Link-U) specify filename of wireguard configuration you'll download. |
 | `SUBSPACE_ALLOWED_IPS_WINDOWS` | `0.0.0.0/1, 128.0.0.0/1, ::/1, 8000::/1` | (Added by Link-U) specify AllowedIPs= setting on Windows, to avoid kill-switch feature. |
+| `SUBSPACE_LISTENPORT_ALTERNATE` | (empty) | (Added by Link-U) additional listen port for migration purposes, implemented by iptables. |
 
 ### Run as a Docker container
 

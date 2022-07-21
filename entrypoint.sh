@@ -140,6 +140,17 @@ if [[ ${SUBSPACE_IPV6_NAT_ENABLED} -ne 0 ]]; then
     /sbin/ip6tables --wait -t nat --append OUTPUT -s ${SUBSPACE_IPV6_POOL} -p tcp --dport 53 -j DNAT --to ${SUBSPACE_IPV6_GW}
   fi
 fi
+
+if [ ! -z ${SUBSPACE_LISTENPORT_ALTERNATE-} ]; then
+  if ! /sbin/iptables -t nat -C PREROUTING -p udp --dport ${SUBSPACE_LISTENPORT_ALTERNATE} -j REDIRECT --to-ports ${SUBSPACE_LISTENPORT}; then
+    /sbin/iptables -t nat -I PREROUTING -p udp --dport ${SUBSPACE_LISTENPORT_ALTERNATE} -j REDIRECT --to-ports ${SUBSPACE_LISTENPORT}
+  fi
+
+  if ! /sbin/ip6tables -t nat -C PREROUTING -p udp --dport ${SUBSPACE_LISTENPORT_ALTERNATE} -j REDIRECT --to-ports ${SUBSPACE_LISTENPORT}; then
+    /sbin/ip6tables -t nat -I PREROUTING -p udp --dport ${SUBSPACE_LISTENPORT_ALTERNATE} -j REDIRECT --to-ports ${SUBSPACE_LISTENPORT}
+  fi
+fi
+
 #
 # WireGuard (${SUBSPACE_IPV4_POOL})
 #
