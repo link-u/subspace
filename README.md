@@ -134,6 +134,8 @@ $ subspace --http-host subspace.example.com
 | `SUBSPACE_BACKLINK`         | `/`                 | The page to set the home button to                                                                                                                   |
 | `SUBSPACE_DISABLE_DNS`      | `false`             | Whether to disable DNS so the client uses their own configured DNS server(s). Consider disabling DNS server, if supporting international VPN clients |
 | `SUBSPACE_PERSISTENT_KEEPALIVE`      | `0`             | Whether PersistentKeepalive should be enabled for clients (seconds) |
+| `SUBSPACE_CONFIG_NAME` | `wg0.conf` | (Added by Link-U) specify filename of wireguard configuration you'll download. |
+| `SUBSPACE_ALLOWED_IPS_WINDOWS` | `0.0.0.0/1, 128.0.0.0/1, ::/1, 8000::/1` | (Added by Link-U) specify AllowedIPs= setting on Windows, to avoid kill-switch feature. |
 
 ### Run as a Docker container
 
