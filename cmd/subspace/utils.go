@@ -13,8 +13,6 @@ import (
 	"text/template"
 	"time"
 	"net"
-	"strconv"
-	"strings"
 )
 
 func RandomString(n int) string {
